@@ -24,8 +24,6 @@ RUN sed -i "s|MAKE_SHARED_LIB=0|MAKE_SHARED_LIB=1|g" makefile
 
 RUN make lib
 
-#RUN mkdir -p .local/lib/python3.8/site-packages
-
 RUN cp /tmp/grib2/lib/libwgrib2.so /usr/lib/python3.8/libwgrib2.so
 
 RUN python3 -m pip install numpy boto3 netCDF4
