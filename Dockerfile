@@ -1,5 +1,5 @@
 # ======================================================================
-# Dockerfile to compile wgrib2 based on Alpine linux
+# Dockerfile to compile wgrib2 based on Ubuntu linux 20.04 ?LTS?
 #
 #           Homepage: http://www.cpc.ncep.noaa.gov/products/wesley/wgrib2/
 # Available versions: ftp://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/
