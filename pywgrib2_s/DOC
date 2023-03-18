@@ -1,0 +1,8 @@
+The documentation for pywgrib2_s.py is on-line at
+
+https://www.cpc.ncep.noaa.gov/products/wesley/wgrib2/pywgrib2_s.html
+
+Pywgrib2_s.py is it the public domain.  
+Please send comments, inprovements, bug reports to wesley.ebisuzaki@noaa.gov.
+Pywgrib2_s.py depends on the wgrib2 library which is mixture of public
+domain, codes with various licenses.

@@ -1,0 +1,80 @@
+Install                                          8/7/2020  Wesley Ebisuzaki
+
+Preliminaries:
+
+   1. Python 3.5+ has to be installed  (I have not tried on older versions of python3)
+   2. numpy has to be installed
+   3. find a directory on your python path to store pywgrib2_s.py and libwgrib2.so
+       call this directory PYTHON_DIR
+
+Step 1: make wgrib2 shared library and wgrib2 executable
+
+  Download wgrib2.tgz from https://ftp.cpc.ncep.noaa.gov/wd51we/tmp/wgrib2.tgz
+       This is a release candidate wgrib2 v3.0.0.
+
+       $ tar -xzvf wgrib2.tgz
+       $ cd grib2
+       edit ./makefile to make a shared library
+       $ make
+       $ make lib
+       $ cp lib/libwgrib2.so PYTHON_DIR/
+
+Step 2: Configure pywgrib2_s.py to  PYTHON_DIR.
+
+Testing:
+
+    Try running python 3.x and importing pywgrib2_s
+
+A Good Result:
+
+ebis@landing2:~$ python3.8 
+Python 3.8.2 (default, Jul 16 2020, 14:00:26) 
+[GCC 9.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import pywgrib2_s
+finished loading libraries
+pywgrib2_s v0.0.7 7-30-2020 w. ebisuzaki
+>>> 
+
+A Bad Result:
+
+-sh-4.1$ python3.5
+Python 3.5.2 |Anaconda 4.2.0 (64-bit)| (default, Jul  2 2016, 17:53:06) 
+[GCC 4.4.7 20120313 (Red Hat 4.4.7-1)] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import pywgrib2_s
+*** Problem  libquadmath.so.0: cannot open shared object file: No such file or directory
+*** Will load wgrib2 library in RTLD_LAZY mode
+Traceback (most recent call last):
+  File "/export/cpc-lw-webisuzak/wd51we/.local/lib/python3.5/site-packages/pywgrib2_s.py", line 29, in <module>
+    my_wgrib2=CDLL(lib)
+  File "/cpc/prod/cpcwebapps/software/anaconda/lib/python3.5/ctypes/__init__.py", line 347, in __init__
+    self._handle = _dlopen(self._name, mode)
+OSError: libquadmath.so.0: cannot open shared object file: No such file or directory
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/export/cpc-lw-webisuzak/wd51we/.local/lib/python3.5/site-packages/pywgrib2_s.py", line 33, in <module>
+    my_wgrib2=CDLL(lib, mode=os.RTLD_LAZY)
+  File "/cpc/prod/cpcwebapps/software/anaconda/lib/python3.5/ctypes/__init__.py", line 347, in __init__
+    self._handle = _dlopen(self._name, mode)
+OSError: libquadmath.so.0: cannot open shared object file: No such file or directory
+>>> 
+
+This is a problem with Anaconda because uses its own shared libraries in 
+preference over the system shared libraries.  The system shared libraries 
+do not use libquadmath.so, so that library is not installed.  However,
+the Anaconda's shared libraries are different from the system libraries and 
+they refer to libquadmath.so, and do not include a copy of libquadmath.so.  
+This is a mistake by Anaconda for not incuding libquadmath.so.  It is 
+also a poor decision by Anaconda for using their copy of the shared library 
+over the system library of the same name.  It is also a mistake by Anaconda 
+for changing the search path for libraries from the python documentation.
+
+
+To work around Anaconda's feature, you have to edit pywgrib2_s.py and add
+a CDLL the gfortran library using a full path name.  The names and locations
+will depend on your system.
+

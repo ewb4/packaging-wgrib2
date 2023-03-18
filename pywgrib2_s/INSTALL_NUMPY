@@ -1,0 +1,3 @@
+
+Install numpy on ubuntu 20.04
+   sudo apt install python3-numpy

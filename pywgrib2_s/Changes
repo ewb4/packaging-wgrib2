@@ -1,0 +1,4 @@
+v0.0.7		1st public release alpha-beta status 9/30/2020
+v0.0.8		fixed ierr vs err confusion, ierr -> err
+		fixed: write(..)  d_scale, b_scale code right
+		updated: write(..) d_scale, b_scale can have value 'same'
