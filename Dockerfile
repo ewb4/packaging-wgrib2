@@ -19,7 +19,6 @@ RUN wget -q -O /tmp/wgrib2.tgz https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/wgrib
 RUN tar -xf /tmp/wgrib2.tgz -C /tmp
 
 WORKDIR /tmp/grib2
-RUN ls -l
 
 RUN sed -i "s|MAKE_SHARED_LIB=0|MAKE_SHARED_LIB=1|g" makefile
 
