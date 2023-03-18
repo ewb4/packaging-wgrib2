@@ -14,7 +14,7 @@ ENV FC=gfortran
 RUN apt-get update
 RUN apt-get install -y build-essential gfortran wget file pip
 
-RUN wget -q -O /tmp/wgrib2.tgz https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/wgrib2.tgz
+RUN wget -q -O /tmp/wgrib2.tgz https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/wgrib2.tgz.v3.1.0
 
 RUN tar -xf /tmp/wgrib2.tgz -C /tmp
 
