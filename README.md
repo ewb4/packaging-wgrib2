@@ -32,7 +32,17 @@ docker run -v "/mnt:/mnt" \
 
 ## main
 
-Where new and future updates occur.  If you see this paragraph, then you are on a historic branch only used for tracking history of other implementations.
+### lambda-wgrib2
+
+wgrib2:        v3.1.1
+pywgrib2_s.py: v0.0.11 5/2020 \$5\$a31ea901d61d15d24edee7b4f23b0a8a0a3e5c6869b68e836d20ead4db724b20
+cmake:         3.19.8
+
+Uses public.ecr.aws/lambda/provided:al2.2023.02.28.13
+
+### lambda-pywgrib2_s
+
+Uses public.ecr.aws/lambda/python:3.8.2023.02.28.14-x86_64
 
 # Why?
 
