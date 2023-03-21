@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/provided:al2.2023.02.28.13 as builder
+FROM public.ecr.aws/lambda/provided:al2.2023.03.21.13-x86_64 as builder
 
 RUN yum install --setopt=tsflags=nodocs -y \
       tar \
@@ -42,7 +42,7 @@ RUN tar -xzf wgrib2.tgz \
   && make \
   && /usr/bin/strip ./wgrib2/wgrib2
 
-FROM public.ecr.aws/lambda/provided:al2.2023.02.28.13 as lambda-base
+FROM public.ecr.aws/lambda/provided:al2.2023.03.21.13-x86_64 as lambda-base
 RUN yum install --setopt=tsflags=nodocs -y \
       libgfortran \
       libgomp \
@@ -55,7 +55,7 @@ COPY 3rd-party/pywgrib2_s/pywgrib2_s.py /opt/wgrib2/python/pywgrib2_s.py
 
 ENTRYPOINT [ "/opt/wgrib2/bin/wgrib2" ]
 
-FROM public.ecr.aws/lambda/python:3.8.2023.02.28.14-x86_64 as lambda-pybase
+FROM public.ecr.aws/lambda/python:3.8.2023.03.21.13-x86_64 as lambda-pybase
 
 RUN yum install --setopt=tsflags=nodocs -y libgfortran libgomp && yum clean all && rm -rf /var/cache/yum \
   && /var/lang/bin/python3 -m pip install numpy boto3 netCDF4 kerchunk
