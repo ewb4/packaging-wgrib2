@@ -31,9 +31,12 @@ RUN tar -xzf cmake.tgz \
   && make install
 
 COPY 3rd-party/wgrib2.tgz .
+COPY wgrib2-v3.1.2-fixed-makefile .
 
 RUN tar -xzf wgrib2.tgz \
   && cd grib2 \
+  && mv makefile makefile.orig \
+  && mv ../wgrib2-v3.1.2-fixed-makefile makefile \
   && sed -i "s|MAKE_SHARED_LIB=0|MAKE_SHARED_LIB=1|g" makefile \
   && make lib \
   && make \

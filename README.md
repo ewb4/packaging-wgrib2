@@ -34,7 +34,7 @@ docker run -v "/mnt:/mnt" \
 
 ### lambda-wgrib2
 
-wgrib2:        v3.1.1
+wgrib2:        v3.1.2 *(with fixed makefile)
 pywgrib2_s.py: v0.0.11 5/2020 \$5\$a31ea901d61d15d24edee7b4f23b0a8a0a3e5c6869b68e836d20ead4db724b20
 cmake:         3.19.8
 
