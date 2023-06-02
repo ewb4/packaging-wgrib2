@@ -6,6 +6,7 @@ RUN yum install --setopt=tsflags=nodocs -y \
       gcc-gfortran \
       make \
       which \
+      file \
     && yum clean all \
     && rm -rf /var/cache/yum
 
@@ -51,7 +52,8 @@ RUN yum install --setopt=tsflags=nodocs -y \
 
 COPY --from=builder /var/task/grib2/wgrib2/wgrib2 /opt/wgrib2/bin/wgrib2
 COPY --from=builder /var/task/grib2/lib/libwgrib2.so /opt/wgrib2/lib/libwgrib2.so
-COPY 3rd-party/pywgrib2_s/pywgrib2_s.py /opt/wgrib2/python/pywgrib2_s.py
+## file not downloaded for this build
+#COPY 3rd-party/pywgrib2_s/pywgrib2_s.py /opt/wgrib2/python/pywgrib2_s.py
 
 ENTRYPOINT [ "/opt/wgrib2/bin/wgrib2" ]
 
