@@ -17,5 +17,5 @@ jobs:
     - uses: actions/checkout@v3
     - name: Build the lambda-wgrib2 Docker image
       run: make lambda-wgrib2
-    - name: Build the lambda-wgrib2 Docker image
+    - name: Build the lambda-pywgrib2 Docker image
       run: make lambda-pywgrib2
