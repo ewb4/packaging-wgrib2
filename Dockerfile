@@ -6,6 +6,7 @@ RUN yum install --setopt=tsflags=nodocs -y \
       gcc-gfortran \
       make \
       which \
+      file \
     && yum clean all \
     && rm -rf /var/cache/yum
 
