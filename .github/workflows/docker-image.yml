@@ -12,10 +12,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        include:
+          - image: wgrib2
+          - image: pywgrib2
+            
     steps:
+    - name: Checkout repository
     - uses: actions/checkout@v3
-    - name: Build the lambda-wgrib2 Docker image
-      run: make lambda-wgrib2
-    - name: Build the lambda-pywgrib2 Docker image
-      run: make lambda-pywgrib2
+    
+    - name: Prepare builder in Docker
+      run: |
+        make 3rd-party/cmake.tgz
+        docker build --target builder -t builder:v3.1.2 .
+    
+    - name: Build the lambda-${{ matrix.image }} Docker image
+      run: make lambda-${{ matrix.image }}
