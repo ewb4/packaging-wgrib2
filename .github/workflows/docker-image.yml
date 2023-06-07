@@ -22,12 +22,12 @@ jobs:
         make 3rd-party/cmake.tgz
         docker build --target foundation -t foundation:$(date +"%s") .
     
-    ## Gleaned from https://github.com/marketplace/actions/docker-layer-caching
+    ## Gleaned from https://github.com/marketplace/actions/docker-layer-caching2
     # In this step, this action saves a list of existing images,
     # the cache is created without them in the post run.
     # It also restores the cache if it exists.
     - name: Docker layer caching and restore
-      uses: satackey/action-docker-layer-caching@v0.0.11
+      uses: jpribyl/action-docker-layer-caching@v0.1.1
       # Ignore the failure of a step and avoid terminating the job.
       continue-on-error: true
     
