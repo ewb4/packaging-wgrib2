@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/provided:al2.2023.03.21.13-x86_64 as builder
+FROM public.ecr.aws/lambda/provided:al2.2023.03.21.13-x86_64 as foundation
 
 RUN yum install --setopt=tsflags=nodocs -y \
       tar \
@@ -31,6 +31,8 @@ RUN tar -xzf cmake.tgz \
   && make \
   && make install
 
+FROM foundation as builder
+
 COPY 3rd-party/wgrib2.tgz .
 COPY wgrib2-v3.1.2-fixed-makefile .
 
@@ -44,11 +46,14 @@ RUN tar -xzf wgrib2.tgz \
   && /usr/bin/strip ./wgrib2/wgrib2
 
 FROM public.ecr.aws/lambda/provided:al2.2023.03.21.13-x86_64 as lambda-base
+
 RUN yum install --setopt=tsflags=nodocs -y \
       libgfortran \
       libgomp \
     && yum clean all \
     && rm -rf /var/cache/yum
+
+FROM lambda-base as lambda-wgrib2
 
 COPY --from=builder /var/task/grib2/wgrib2/wgrib2 /opt/wgrib2/bin/wgrib2
 COPY --from=builder /var/task/grib2/lib/libwgrib2.so /opt/wgrib2/lib/libwgrib2.so
@@ -57,10 +62,9 @@ COPY --from=builder /var/task/grib2/lib/libwgrib2.so /opt/wgrib2/lib/libwgrib2.s
 
 ENTRYPOINT [ "/opt/wgrib2/bin/wgrib2" ]
 
-FROM public.ecr.aws/lambda/python:3.8.2023.03.21.13-x86_64 as lambda-pybase
+FROM lambda-base as lambda-pywgrib2
 
-RUN yum install --setopt=tsflags=nodocs -y libgfortran libgomp && yum clean all && rm -rf /var/cache/yum \
-  && /var/lang/bin/python3 -m pip install numpy boto3 netCDF4 kerchunk
+RUN /var/lang/bin/python3 -m pip install numpy boto3 netCDF4 kerchunk
 # https://stackoverflow.com/questions/61276309/how-to-shrink-large-python-package-for-aws-lambda-layer
 #RUN yum install --setopt=tsflags=nodocs -y libgfortran libgomp && yum clean all && rm -rf /var/cache/yum \
 #  && /var/lang/bin/python3 -m pip install numpy boto3 netCDF4 kerchunk \

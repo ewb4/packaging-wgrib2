@@ -10,8 +10,8 @@
 
 .PHONY: lambda-wgrib2
 lambda-wgrib2: 3rd-party/cmake.tgz 3rd-party/wgrib2.tgz
-	docker build --target lambda-base -t lambda-wgrib2:v3.1.2 .
+	docker build --target lambda-wgrib2 -t lambda-wgrib2:v3.1.2 .
 
 .PHONY: lambda-pywgrib2
 lambda-pywgrib2: 3rd-party/cmake.tgz 3rd-party/wgrib2.tgz 3rd-party/pywgrib2_s.py
-	docker build --target lambda-pybase -t lambda-pywgrib2:v3.1.2 .
+	docker build --target lambda-pywgrib2 -t lambda-pywgrib2:v3.1.2 .
