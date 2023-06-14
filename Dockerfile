@@ -64,7 +64,12 @@ ENTRYPOINT [ "/opt/wgrib2/bin/wgrib2" ]
 
 FROM public.ecr.aws/lambda/python:3.8.2023.03.21.13-x86_64 as lambda-pywgrib2
 
-RUN /var/lang/bin/python3 -m pip install numpy boto3 netCDF4 kerchunk
+RUN yum install --setopt=tsflags=nodocs -y \
+      libgfortran \
+      libgomp \
+    && yum clean all \
+    && rm -rf /var/cache/yum \
+  && /var/lang/bin/python3 -m pip install numpy boto3 netCDF4 kerchunk
 # https://stackoverflow.com/questions/61276309/how-to-shrink-large-python-package-for-aws-lambda-layer
 #RUN yum install --setopt=tsflags=nodocs -y libgfortran libgomp && yum clean all && rm -rf /var/cache/yum \
 #  && /var/lang/bin/python3 -m pip install numpy boto3 netCDF4 kerchunk \
