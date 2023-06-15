@@ -51,6 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Actor
-        run: echo "Actor: ${{ github.actor }}"
+        run: |
+          echo "Actor: ${{ github.actor }}"
       - name: Output TEST_VAR global context
         run: echo '$TEST_VAR'
