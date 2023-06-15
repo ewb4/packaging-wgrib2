@@ -28,6 +28,7 @@ RUN cp /tmp/grib2/lib/libwgrib2.so /usr/lib/python3.8/libwgrib2.so
 
 RUN python3 -m pip install numpy boto3 netCDF4
 
-RUN wget -q -O /usr/lib/python3.8/pywgrib2_s.py https://ftp.cpc.ncep.noaa.gov/wd51we/pywgrib2_s/pywgrib2_s/pywgrib2_s.py
+RUN wget -q -O - https://ftp.cpc.ncep.noaa.gov/wd51we/pywgrib2_s/pywgrib2_s.tgz.v0.0.11 | \
+      tar -x -C /usr/lib/python3.8 -z -f - --strip-components=1 pywgrib2_s/pywgrib2_s.py
 
 ENTRYPOINT ["python3"]
