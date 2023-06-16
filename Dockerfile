@@ -5,7 +5,7 @@
 # Available versions: ftp://ftp.cpc.ncep.noaa.gov/wd51we/wgrib2/
 # ======================================================================
 
-FROM ubuntu:20.04 AS base
+FROM ubuntu:22.04 AS base
 
 ENV COMP_SYS=gnu_linux
 ENV CC=gcc
