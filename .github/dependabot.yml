@@ -23,5 +23,35 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      # Prefix all commit messages with "[docker] "
+      # Prefix all commit messages with "[Docker] "
       prefix: "[Docker] "
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      # Prefix all commit messages with "[Docker 28mm] "
+      prefix: "[Docker 28mm] "
+    # Raise pull requests for version updates
+    # to docker against the `28mm` branch
+    target-branch: "28mm"
+    ## Labels from defined list on pull requests for version updates only
+    #labels:
+    #  - "Docker dependencies for 28mm"
+    # Allow up to 2 open pull requests for Docker dependencies in 28mm 
+    open-pull-requests-limit: 2
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      # Prefix all commit messages with "[Docker PirateWeather] "
+      prefix: "[Docker PirateWeather] "
+    # Raise pull requests for version updates
+    # to docker against the `PirateWeather` branch
+    target-branch: "PirateWeather"
+    ## Labels from defined list on pull requests for version updates only
+    #labels:
+    #  - "Docker dependencies for PirateWeather" 
+    # Allow up to 2 open pull requests for Docker dependencies in PirateWeather 
+    open-pull-requests-limit: 2
