@@ -43,8 +43,8 @@ updates:
     ## Labels from defined list on pull requests for version updates only
     #labels:
     #  - "Docker dependencies for 28mm"
-    # Allow up to 2 open pull requests for Docker dependencies in 28mm 
-    open-pull-requests-limit: 2
+    # Allow up to 2 open pull requests for Docker dependencies in 28mm - This may be for all docker package systems
+    open-pull-requests-limit: 10
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
@@ -58,5 +58,5 @@ updates:
     ## Labels from defined list on pull requests for version updates only
     #labels:
     #  - "Docker dependencies for PirateWeather" 
-    # Allow up to 2 open pull requests for Docker dependencies in PirateWeather 
-    open-pull-requests-limit: 2
+    # Allow up to 2 open pull requests for Docker dependencies in PirateWeather - This may be for all docker package systems
+    open-pull-requests-limit: 10
