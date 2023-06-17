@@ -5,6 +5,11 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
+registries:
+  # Add details for ecr at AWS
+  ecr-docker:
+    type: docker-registry
+    url: https://public.ecr.aws
 updates:
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
