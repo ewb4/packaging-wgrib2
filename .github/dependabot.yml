@@ -25,6 +25,8 @@ updates:
   # https://github.com/dependabot/dependabot-core/issues/2178
   - package-ecosystem: "docker"
     directory: "/"
+    registries:
+      - ecr-docker # Allow version updates for dependencies in this registry
     schedule:
       interval: "weekly"
     commit-message:
