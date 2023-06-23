@@ -39,22 +39,22 @@ jobs:
       # Ignore the failure of a step and avoid terminating the job.
       continue-on-error: true
       
-  build-wgrib2:
-    runs-on: ubuntu-latest
-    needs: build-foundation
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    
+#  build-wgrib2:
+#    runs-on: ubuntu-latest
+#    needs: build-foundation
+#    steps:
+#    - name: Checkout repository
+#      uses: actions/checkout@v3
+#    
     - name: Build the lambda-wgrib2 Docker image
       run: make lambda-wgrib2
 
-  build-pywgrib2:
-    runs-on: ubuntu-latest
-    needs: build-foundation
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-      
+#  build-pywgrib2:
+#    runs-on: ubuntu-latest
+#    needs: build-foundation
+#    steps:
+#    - name: Checkout repository
+#      uses: actions/checkout@v3
+#      
     - name: Build the lambda-pywgrib2 Docker image
       run: make lambda-pywgrib2
