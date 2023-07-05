@@ -62,7 +62,7 @@ COPY --from=builder /var/task/grib2/lib/libwgrib2.so /opt/wgrib2/lib/libwgrib2.s
 
 ENTRYPOINT [ "/opt/wgrib2/bin/wgrib2" ]
 
-FROM public.ecr.aws/lambda/python:3.8.2023.03.21.13-x86_64 as lambda-pywgrib2
+FROM public.ecr.aws/lambda/python:3.8.2023.03.21.13-x86_64 as lambda-pybase
 
 RUN yum install --setopt=tsflags=nodocs -y \
       libgfortran \
@@ -75,6 +75,8 @@ RUN yum install --setopt=tsflags=nodocs -y \
 #  && /var/lang/bin/python3 -m pip install numpy boto3 netCDF4 kerchunk \
 #  && find /var/lang/ -type d \( -name "tests" -o -name "docs" -o -name "__pycache__" \) -print0 | \
 #       xargs -0 -n1 rm -rvf
+
+FROM lambda-pybase as lambda-pywgrib2
 
 COPY --from=builder /var/task/grib2/lib/libwgrib2.so /var/lang/lib/libwgrib2.so
 COPY 3rd-party/pywgrib2_s/pywgrib2_s.py /opt/wgrib2/lib/python/pywgrib2_s.py

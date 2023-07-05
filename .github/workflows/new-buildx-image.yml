@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - refactor-docker-build  
     paths-ignore:
       - .github/workflows/*.yml
   pull_request:
@@ -76,7 +75,7 @@ jobs:
         uses: actions/cache@v1.2.1
         with:
           path: |
-            ${{ env.GITHUB_WORKSPACE }}/3rd-party/*
+            ${{ github.workspace }}/3rd-party/*
           # Key is named differently to avoid collision
           key: ${{ runner.os }}-al2-3rd-party
           restore-keys: |
@@ -292,7 +291,7 @@ jobs:
         uses: actions/cache@v1.2.1
         with:
           path: |
-            ${{ env.GITHUB_WORKSPACE }}/3rd-party/*
+            ${{ github.workspace }}/3rd-party/*
           # Key is named differently to avoid collision
           key: ${{ runner.os }}-al2-3rd-party
           restore-keys: |
@@ -459,7 +458,7 @@ jobs:
         uses: actions/cache@v1.2.1
         with:
           path: |
-            ${{ env.GITHUB_WORKSPACE }}/3rd-party/*
+            ${{ github.workspace }}/3rd-party/*
           # Key is named differently to avoid collision
           key: ${{ runner.os }}-al2-3rd-party
           restore-keys: |
@@ -631,223 +630,223 @@ jobs:
           docker buildx imagetools inspect localhost:5000/builder:latest
 
   lambda-wgrib2:
-      runs-on: ubuntu-latest
-      services:
-        registry:
-          image: registry:2
-          ports:
-            - 5000:5000
-          volumes:
-          - /tmp/docker-registry:/var/lib/registry
-      needs:
-          - lambda-base
-          - builder
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-          
-        - name: Cache Docker registry
-          id: cache-registry
-          uses: actions/cache@v1.2.1
-          with:
-            path: |
-              /tmp/docker-registry
-            # Key is named differently to avoid collision
-            key: ${{ runner.os }}-al2-registry-${{ github.job }}
-            restore-keys: |
-              ${{ runner.os }}-al2-registry
-              
-        - name: Cache downloaded software
-          id: cache-3rd-party
-          uses: actions/cache@v1.2.1
-          with:
-            path: |
-              ${{ env.GITHUB_WORKSPACE }}/3rd-party/*
-            # Key is named differently to avoid collision
-            key: ${{ runner.os }}-al2-3rd-party
-            restore-keys: |
-              ${{ runner.os }}-al2-3rd-party
-              
-        - name: Download artifact
-          uses: actions/download-artifact@v2.1.1
-          with:
-            name: lambda-base
-            path: /tmp
-            
-        - name: Download artifact
-          uses: actions/download-artifact@v2.1.1
-          with:
-            name: builder
-            path: /tmp
-              
-        - name: Setup Docker Buildx
-          id: buildx
-          uses: docker/setup-buildx-action@v2.7.0
-          with:
-            driver-opts: network=host
-
-        - name: Cache Docker layers
-          uses: actions/cache@v1.2.1
-          with:
-            path: |
-              /tmp/.buildx-cache
-            # Key is named differently to avoid collision
-            key: ${{ runner.os }}-al2-buildx-${{ github.job }}
-            restore-keys: |
-              ${{ runner.os }}-al2-buildx
-              
-        - name: Load image - lambda-base
-          run: |
-            gzip -dv /tmp/lambda-base.tar.gz
-            docker load --input /tmp/lambda-base.tar
-            docker image ls -a
-            docker image tag lambda-base:latest localhost:5000/lambda-base:latest
-            docker image push localhost:5000/lambda-base:latest
-            
-        - name: Load image - builder
-          run: |
-            gzip -dv /tmp/builder.tar.gz
-            docker load --input /tmp/builder.tar
-            docker image ls -a
-            docker image tag builder:latest localhost:5000/builder:latest
-            docker image push localhost:5000/builder:latest
-
-        - name: Build lambda-wgrib2 image
-          uses: docker/build-push-action@v4.1.1
-          with:
-            context: .
-            builder: ${{ steps.buildx.outputs.name }}
-            file: Dockerfile
-            # Set the desired build target here
-            target: lambda-wgrib2
-            push: true
-            tags: localhost:5000/lambda-wgrib2:latest
-            #tags: ${{ steps.prep.outputs.tagged_image }}
-            cache-from: type=local,src=/tmp/.buildx-cache
-            # Note the mode=max here
-            # More: https://github.com/moby/buildkit#--export-cache-options
-            # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
-            cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-            build-contexts: |
-              builder=docker-image://localhost:5000/lambda-base:latest
-              builder=docker-image://localhost:5000/builder:latest
-
-        - name: Move cache
-          run: |
-            rm -rf /tmp/.buildx-cache
-            mv -v /tmp/.buildx-cache-new /tmp/.buildx-cache
-                  
-        - name: Inspect foundation
-          if: 'false'
-          run: |
-            docker buildx imagetools inspect localhost:5000/foundation:latest
+    runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+        volumes:
+        - /tmp/docker-registry:/var/lib/registry
+    needs:
+        - lambda-base
+        - builder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
         
-        - name: Inspect lambda-base
-          if: 'false'
-          run: |
-            docker buildx imagetools inspect localhost:5000/lambda-base:latest
-
-        - name: Inspect builder
-          if: 'false'
-          run: |
-            docker buildx imagetools inspect localhost:5000/builder:latest
+      - name: Cache Docker registry
+        id: cache-registry
+        uses: actions/cache@v1.2.1
+        with:
+          path: |
+            /tmp/docker-registry
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-al2-registry-${{ github.job }}
+          restore-keys: |
+            ${{ runner.os }}-al2-registry
             
-        - name: Inspect lambda-wgrib2
-          run: |
-            docker buildx imagetools inspect localhost:5000/lambda-wgrib2:latest
+      - name: Cache downloaded software
+        id: cache-3rd-party
+        uses: actions/cache@v1.2.1
+        with:
+          path: |
+            ${{ github.workspace }}/3rd-party/*
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-al2-3rd-party
+          restore-keys: |
+            ${{ runner.os }}-al2-3rd-party
+            
+      - name: Download artifact
+        uses: actions/download-artifact@v2.1.1
+        with:
+          name: lambda-base
+          path: /tmp
+          
+      - name: Download artifact
+        uses: actions/download-artifact@v2.1.1
+        with:
+          name: builder
+          path: /tmp
+            
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2.7.0
+        with:
+          driver-opts: network=host
+
+      - name: Cache Docker layers
+        uses: actions/cache@v1.2.1
+        with:
+          path: |
+            /tmp/.buildx-cache
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-al2-buildx-${{ github.job }}
+          restore-keys: |
+            ${{ runner.os }}-al2-buildx
+            
+      - name: Load image - lambda-base
+        run: |
+          gzip -dv /tmp/lambda-base.tar.gz
+          docker load --input /tmp/lambda-base.tar
+          docker image ls -a
+          docker image tag lambda-base:latest localhost:5000/lambda-base:latest
+          docker image push localhost:5000/lambda-base:latest
+          
+      - name: Load image - builder
+        run: |
+          gzip -dv /tmp/builder.tar.gz
+          docker load --input /tmp/builder.tar
+          docker image ls -a
+          docker image tag builder:latest localhost:5000/builder:latest
+          docker image push localhost:5000/builder:latest
+
+      - name: Build lambda-wgrib2 image
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: lambda-wgrib2
+          push: true
+          tags: localhost:5000/lambda-wgrib2:latest
+          #tags: ${{ steps.prep.outputs.tagged_image }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          build-contexts: |
+            builder=docker-image://localhost:5000/lambda-base:latest
+            builder=docker-image://localhost:5000/builder:latest
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv -v /tmp/.buildx-cache-new /tmp/.buildx-cache
+                
+      - name: Inspect foundation
+        if: 'false'
+        run: |
+          docker buildx imagetools inspect localhost:5000/foundation:latest
+      
+      - name: Inspect lambda-base
+        if: 'false'
+        run: |
+          docker buildx imagetools inspect localhost:5000/lambda-base:latest
+
+      - name: Inspect builder
+        if: 'false'
+        run: |
+          docker buildx imagetools inspect localhost:5000/builder:latest
+          
+      - name: Inspect lambda-wgrib2
+        run: |
+          docker buildx imagetools inspect localhost:5000/lambda-wgrib2:latest
 
   lambda-pywgrib2:
-      runs-on: ubuntu-latest
-      services:
-        registry:
-          image: registry:2
-          ports:
-            - 5000:5000
-          volumes:
-          - /tmp/docker-registry:/var/lib/registry
-      needs:
-          - builder
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-          
-        - name: Cache Docker registry
-          id: cache-registry
-          uses: actions/cache@v1.2.1
-          with:
-            path: |
-              /tmp/docker-registry
-            # Key is named differently to avoid collision
-            key: ${{ runner.os }}-al2-registry-${{ github.job }}
-            restore-keys: |
-              ${{ runner.os }}-al2-registry
-              
-        - name: Cache downloaded software
-          id: cache-3rd-party
-          uses: actions/cache@v1.2.1
-          with:
-            path: |
-              ${{ env.GITHUB_WORKSPACE }}/3rd-party/*
-            # Key is named differently to avoid collision
-            key: ${{ runner.os }}-al2-3rd-party
-            restore-keys: |
-              ${{ runner.os }}-al2-3rd-party
-              
-        - name: Download artifact
-          uses: actions/download-artifact@v2.1.1
-          with:
-            name: builder
-            path: /tmp
-              
-        - name: Setup Docker Buildx
-          id: buildx
-          uses: docker/setup-buildx-action@v2.7.0
-          with:
-            driver-opts: network=host
-
-        - name: Cache Docker layers
-          uses: actions/cache@v1.2.1
-          with:
-            path: |
-              /tmp/.buildx-cache
-              ./3rd-party/pywgrib2_s.py
-            # Key is named differently to avoid collision
-            key: ${{ runner.os }}-al2-buildx-${{ github.job }}
-            restore-keys: |
-              ${{ runner.os }}-al2-buildx
-
-        - name: Load image - builder
-          run: |
-            gzip -dv /tmp/builder.tar.gz
-            docker load --input /tmp/builder.tar
-            docker image ls -a
-            docker image tag builder:latest localhost:5000/builder:latest
-            docker image push localhost:5000/builder:latest
+    runs-on: ubuntu-latest
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+        volumes:
+        - /tmp/docker-registry:/var/lib/registry
+    needs:
+        - builder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
         
-        - name: Download pywgrib2_s.py
-          run: |
-            make 3rd-party/pywgrib2_s.py
+      - name: Cache Docker registry
+        id: cache-registry
+        uses: actions/cache@v1.2.1
+        with:
+          path: |
+            /tmp/docker-registry
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-al2-registry-${{ github.job }}
+          restore-keys: |
+            ${{ runner.os }}-al2-registry
+            
+      - name: Cache downloaded software
+        id: cache-3rd-party
+        uses: actions/cache@v1.2.1
+        with:
+          path: |
+            ${{ github.workspace }}/3rd-party/*
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-al2-3rd-party
+          restore-keys: |
+            ${{ runner.os }}-al2-3rd-party
+            
+      - name: Download artifact
+        uses: actions/download-artifact@v2.1.1
+        with:
+          name: builder
+          path: /tmp
+            
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2.7.0
+        with:
+          driver-opts: network=host
 
-        - name: Build lambda-pywgrib2 image
-          uses: docker/build-push-action@v4.1.1
-          with:
-            context: .
-            builder: ${{ steps.buildx.outputs.name }}
-            file: Dockerfile
-            # Set the desired build target here
-            target: lambda-pywgrib2
-            push: true
-            tags: localhost:5000/lambda-pywgrib2:latest
-            #tags: ${{ steps.prep.outputs.tagged_image }}
-            cache-from: type=local,src=/tmp/.buildx-cache
-            # Note the mode=max here
-            # More: https://github.com/moby/buildkit#--export-cache-options
-            # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
-            cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-            build-contexts: |
-              builder=docker-image://localhost:5000/builder:latest
+      - name: Cache Docker layers
+        uses: actions/cache@v1.2.1
+        with:
+          path: |
+            /tmp/.buildx-cache
+            ./3rd-party/pywgrib2_s.py
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-al2-buildx-${{ github.job }}
+          restore-keys: |
+            ${{ runner.os }}-al2-buildx
 
-        - name: Move cache
-          run: |
-            rm -rf /tmp/.buildx-cache
-            mv -v /tmp/.buildx-cache-new /tmp/.buildx-cache
+      - name: Load image - builder
+        run: |
+          gzip -dv /tmp/builder.tar.gz
+          docker load --input /tmp/builder.tar
+          docker image ls -a
+          docker image tag builder:latest localhost:5000/builder:latest
+          docker image push localhost:5000/builder:latest
+      
+      - name: Download pywgrib2_s.py
+        run: |
+          make 3rd-party/pywgrib2_s.py
+
+      - name: Build lambda-pywgrib2 image
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: lambda-pywgrib2
+          push: true
+          tags: localhost:5000/lambda-pywgrib2:latest
+          #tags: ${{ steps.prep.outputs.tagged_image }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          build-contexts: |
+            builder=docker-image://localhost:5000/builder:latest
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv -v /tmp/.buildx-cache-new /tmp/.buildx-cache
