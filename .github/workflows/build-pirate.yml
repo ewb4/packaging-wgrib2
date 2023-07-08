@@ -1,0 +1,47 @@
+name: Build PirateWeather Docker
+
+on:
+  # schedule:
+  #   - cron: '30 22 * * *'
+  push:
+    branches: none # [ PirateWeather ]
+    # Publish semver tags as releases.
+    tags: none # [ 'v0.3.*' ]
+  pull_request:
+    branches: none # [ PirateWeather ]
+  
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2.7.0
+        
+      - name: Download wgrib2
+        run: |
+          if [ ! -f 3rd-party/wgrib2.tgz ] ; then
+            make 3rd-party/wgrib2.tgz
+          fi
+          
+      - name: Build pirate-wgrib2 image
+        if: 'false'
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          push: false
+          tags: pirate-wgrib2
