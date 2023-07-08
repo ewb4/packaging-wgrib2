@@ -218,6 +218,7 @@ jobs:
           # docker buildx imagetools inspect localhost:5000/foundation:latest
           docker buildx imagetools inspect foundation
       
+       ## Gleaned from https://github.com/marketplace/actions/docker-extract
   #    - name: Extract from Docker image
   #      uses: shrink/actions-docker-extract@v2
   #      id: extract-cmake
@@ -470,7 +471,8 @@ jobs:
         with:
           driver-opts: network=host
           
-      - name: Download artifact
+      - name: Download foundation artifact/container
+        ## Gleaned from https://docs.docker.com/build/ci/github-actions/share-image-jobs/
         uses: actions/download-artifact@v2.1.1
         with:
           name: foundation
@@ -556,6 +558,7 @@ jobs:
           # More: https://github.com/moby/buildkit#--export-cache-options
           # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          ## Gleaned from https://docs.docker.com/build/ci/github-actions/named-contexts/
           build-contexts: |
             foundation=docker-image://localhost:5000/foundation:latest
             
