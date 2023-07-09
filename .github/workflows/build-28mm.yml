@@ -36,6 +36,14 @@ jobs:
             make 3rd-party/wgrib2.tgz
           fi
           
+      - name: Set variables
+        id: vars
+        run: |
+          # access with 'echo ${{ steps.vars.outputs.tag }}'
+          echo "tag=${GITHUB_REF#refs/*/}" >> ${GITHUB_OUTPUT}
+          echo "sha=${GITHUB_SHA}" >> ${GITHUB_OUTPUT}
+          echo "repoowner=${GITHUB_REPOSITORY_OWNER,,}" >> ${GITHUB_OUTPUT}
+        
       - name: Build builder image
         if: 'false'
         uses: docker/build-push-action@v4.1.1
@@ -46,4 +54,7 @@ jobs:
           # Set the desired build target here
           target: 28mm-wgrib2
           push: false
-          tags: 28mm-wgrib2
+          tags: |
+            ${{ steps.vars.outputs.repoowner }}/28mm-wgrib2:${{ github.sha }}
+            ${{ steps.vars.outputs.repoowner }}/28mm-wgrib2:${{ steps.vars.outputs.tag }}
+            ${{ steps.vars.outputs.repoowner }}/28mm-wgrib2:latest
