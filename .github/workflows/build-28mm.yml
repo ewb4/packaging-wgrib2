@@ -44,6 +44,18 @@ jobs:
           echo "sha=${GITHUB_SHA}" >> ${GITHUB_OUTPUT}
           echo "repoowner=${GITHUB_REPOSITORY_OWNER,,}" >> ${GITHUB_OUTPUT}
         
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4.6.0
+        with:
+          images: ${{ steps.vars.outputs.repoowner }}/28mm-wgrib2
+      
+      - name: Debug
+        run: |
+          echo '${{ toJSON(steps.meta.outputs) }}'
+          echo
+          env | sort
+          
       - name: Build builder image
         if: 'false'
         uses: docker/build-push-action@v4.1.1
