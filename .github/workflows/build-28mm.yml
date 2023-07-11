@@ -16,6 +16,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: ${{ github.ref_name == '28mm' }}
     permissions:
       contents: read
       packages: write
