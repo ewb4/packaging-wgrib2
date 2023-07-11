@@ -56,7 +56,7 @@ jobs:
           echo
           env | sort
           
-      - name: Build builder image
+      - name: Build 28mm-wgrib2 image
         if: 'false'
         uses: docker/build-push-action@v4.1.1
         with:
