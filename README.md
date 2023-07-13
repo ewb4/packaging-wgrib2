@@ -6,15 +6,15 @@ Original releases from each upstream and any updates are copied into the branch 
 
 ### 28mm
 
-GitHub: [28mm/docker-wgrib2](https://github.com/28mm/docker-wgrib2) (https://github.com/28mm/docker-wgrib2)
-Container: [DockerHub 28mm/wgrib2](https://hub.docker.com/r/28mm/wgrib2)  (https://hub.docker.com/r/28mm/wgrib2)
+- GitHub: [28mm/docker-wgrib2](https://github.com/28mm/docker-wgrib2) (https://github.com/28mm/docker-wgrib2)
+- Container: [DockerHub 28mm/wgrib2](https://hub.docker.com/r/28mm/wgrib2)  (https://hub.docker.com/r/28mm/wgrib2)
 
 Only one [commit](https://github.com/28mm/docker-wgrib2/commit/15f284a5c3372672537053a26c4755785e56fa16) appears to have been made for the Dockerfile, Makefile, and accompanying README.md.  This occurred on 9 Dec 2018.
 
 ### PirateWeather
 
-GitHub: [alexander0042/pirateweather](https://github.com/alexander0042/pirateweather/tree/main/wgrib2) (https://github.com/alexander0042/pirateweather/tree/main/wgrib2)
-Container: [AWS ECR j9v4j3c7/pirate-wgrib2](https://gallery.ecr.aws/j9v4j3c7/pirate-wgrib2) (https://gallery.ecr.aws/j9v4j3c7/pirate-wgrib2)
+- GitHub: [alexander0042/pirateweather](https://github.com/alexander0042/pirateweather/tree/main/wgrib2) (https://github.com/alexander0042/pirateweather/tree/main/wgrib2)
+- Container: [AWS ECR j9v4j3c7/pirate-wgrib2](https://gallery.ecr.aws/j9v4j3c7/pirate-wgrib2) (https://gallery.ecr.aws/j9v4j3c7/pirate-wgrib2)
 
 Only one [commit](https://github.com/alexander0042/pirateweather/commit/1f380a272eac46a5efd167fe0a12b7500fdc7bc2) appears to have been made for the Dockerfile and accompanying README.md. This occurred on 5 Jan 2022.
 
