@@ -1,3 +1,13 @@
+# Image inventory - alexander0042/pirateweather
+
+```json
+{
+  "image": "pirate-wgrib2",
+  "base": {"image": "ubuntu", "version": "20.04"},
+  "software": {"wgrib2": "v3.1.0","pywgrib2_s": "v0.0.11"}
+}
+```
+
 # Branches
 
 Original releases from each upstream and any updates are copied into the branch for each. Modifications have been applied within the respective branches in an attempt to track learnings and changes that better represent the configuration necessary to recreate the original artifacts.
