@@ -1,3 +1,13 @@
+# Image inventory - 28mm/wgrib2
+
+```json
+{
+  "image": "28mm-wgrib2",
+  "base": {"image": "alpine", "version": "3.8.5"},
+  "software": {"wgrib2": "v2.0.7","pywgrib2_s": null}
+}
+```
+
 # Branches
 
 Original releases from each upstream and any updates are copied into the branch for each. Modifications have been applied within the respective branches in an attempt to track learnings and changes that better represent the configuration necessary to recreate the original artifacts.
