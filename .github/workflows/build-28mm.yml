@@ -1,0 +1,100 @@
+name: Build 28mm Docker
+
+on:
+  # schedule:
+  #   - cron: '30 22 * * *'
+  push:
+    branches: [ 28mm ]
+    # Publish semver tags as releases.
+    tags: [ 'v0.1.*' ]
+  pull_request:
+    branches: [ 28mm ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  # but only if the workflow yml file is in the master/main branch
+  workflow_dispatch:
+
+## Gleaned from https://yonatankra.com/7-github-actions-tricks-i-wish-i-knew-before-i-started/#6_Saving_Computation_Time_by_Stopping_Obsolete_Workflows
+concurrency:
+  group: ci-tests-${{ github.ref }}-1
+  cancel-in-progress: true
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2.7.0
+
+      - name: Download wgrib2
+        run: |
+          if [ ! -f 3rd-party/wgrib2.tgz ] ; then
+            make 3rd-party/wgrib2.tgz
+          fi
+
+      - name: Set variables
+        id: vars
+        run: |
+          # access with 'echo ${{ steps.vars.outputs.tag }}'
+          echo "tag=${GITHUB_REF#refs/*/}" >> ${GITHUB_OUTPUT}
+          echo "sha=${GITHUB_SHA}" >> ${GITHUB_OUTPUT}
+          echo "repoowner=${GITHUB_REPOSITORY_OWNER,,}" >> ${GITHUB_OUTPUT}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4.6.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ steps.vars.outputs.repoowner }}/28mm-wgrib2
+          labels: |
+            org.opencontainers.image.description=Rebuild of 28mm/wgrib2
+            org.opencontainers.image.title=28mm-wgrib2
+          tags: |
+            # minimal (short sha)
+            type=sha
+            # full length sha
+            type=sha,format=long
+            type=ref,event=branch
+            type=semver,pattern=v{{version}}
+
+      - name: Debug
+        run: |
+          echo '${{ toJSON(steps.meta.outputs) }}'
+          echo
+          env | sort
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2.2.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build 28mm-wgrib2 image
+        if: 'true'
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
