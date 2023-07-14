@@ -3,7 +3,7 @@
 ```json
 {
   "image": "pirate-wgrib2",
-  "base": {"image": "ubuntu", "version": "20.04"},
+  "base": {"image": "ubuntu", "version": "22.04"},
   "software": {"wgrib2": "v3.1.0","pywgrib2_s": "v0.0.11"}
 }
 ```
