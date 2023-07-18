@@ -231,19 +231,7 @@ jobs:
   #      with:
   #        path: ${{ steps.extract-cmake.outputs.destination }}
   #        name: cmake-cache
-      
-  #    - name: Debug directory in docker
-  #      run: |
-  #        echo "Directory:" && pwd && echo
-          # Not what you want... rebuilding the image is not the correct answer
-          # docker buildx build --output type=docker,name=localhost:5000/foundation:latest .
-          # Again, Not what you want... rebuilding the image is not the correct answer
-          # docker build --target=foundation --output type=local,dest=$(pwd)/foundation/ .
-          # docker exec -i localhost:5000/foundation:latest 'ls -laR'
-          # docker run --rm -i localhost:5000/foundation:latest 'uname -a && pwd && ls -laRh && exit'
-          # echo "Directory list:" && ls -laR && echo
-          # echo "Directory /tmp list:" && ls -laRh /tmp && echo
-      
+  #
   #    - name: Upload a Build Artifact
   #      uses: actions/upload-artifact@v3.1.2
   #      with:
@@ -734,6 +722,27 @@ jobs:
             builder=docker-image://localhost:5000/lambda-base:latest
             builder=docker-image://localhost:5000/builder:latest
 
+      - name: Build and export
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: lambda-wgrib2
+          tags: lambda-wgrib2:latest
+          outputs: type=docker,dest=/tmp/lambda-wgrib2.tar
+
+      - name: Compress lambda-wgrib2.tar
+        run: |
+          gzip -9v /tmp/lambda-wgrib2.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: lambda-wgrib2
+          path: /tmp/lambda-wgrib2.tar.gz
+
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache
@@ -848,6 +857,27 @@ jobs:
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
           build-contexts: |
             builder=docker-image://localhost:5000/builder:latest
+
+      - name: Build and export
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: lambda-pywgrib2
+          tags: lambda-pywgrib2:latest
+          outputs: type=docker,dest=/tmp/lambda-pywgrib2.tar
+
+      - name: Compress lambda-pywgrib2.tar
+        run: |
+          gzip -9v /tmp/lambda-pywgrib2.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: lambda-pywgrib2
+          path: /tmp/lambda-pywgrib2.tar.gz
 
       - name: Move cache
         run: |
