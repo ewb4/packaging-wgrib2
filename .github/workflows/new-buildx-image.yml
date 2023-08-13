@@ -219,19 +219,19 @@ jobs:
           docker buildx imagetools inspect foundation
       
        ## Gleaned from https://github.com/marketplace/actions/docker-extract
-      - name: Extract from Docker image
-        uses: shrink/actions-docker-extract@v2
-        id: extract-cmake
-        with:
-          image: "localhost:5000/foundation"
-          path: "cmake-*"  # file or directory you want out
-      
-      - name: Upload cmake-cache artifact
-        uses: actions/upload-artifact@v2
-        with:
-          path: ${{ steps.extract-cmake.outputs.destination }}
-          name: cmake-cache
-  
+  #    - name: Extract from Docker image
+  #      uses: shrink/actions-docker-extract@v2
+  #      id: extract-cmake
+  #      with:
+  #        image: "localhost:5000/foundation"
+  #        path: "cmake-*"  # file or directory you want out
+  #    
+  #    - name: Upload cmake-cache artifact
+  #      uses: actions/upload-artifact@v2
+  #      with:
+  #        path: ${{ steps.extract-cmake.outputs.destination }}
+  #        name: cmake-cache
+  #
   #    - name: Upload a Build Artifact
   #      uses: actions/upload-artifact@v3.1.2
   #      with:
