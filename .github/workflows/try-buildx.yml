@@ -1,0 +1,289 @@
+name: buildx monolithic Docker Image CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+## Gleaned from https://yonatankra.com/7-github-actions-tricks-i-wish-i-knew-before-i-started/#6_Saving_Computation_Time_by_Stopping_Obsolete_Workflows
+concurrency:
+  group: ci-tests-${{ github.ref }}-1
+  cancel-in-progress: true
+
+env:
+  # Use docker.io for Docker Hub if empty
+  GHREGISTRY: ghcr.io
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    services:
+      registry-service:
+        image: registry:2
+        ports:
+          - 5000:5000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cache downloaded software
+        if: 'false'
+        id: cache-3rd-party
+        uses: actions/cache@v3.3.1
+        with:
+          path: |
+            ${{ github.workspace }}/3rd-party/*
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-al2-3rd-party
+          restore-keys: |
+            ${{ runner.os }}-al2-3rd-party
+
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2.7.0
+        with:
+          driver-opts: network=host
+          buildkitd-flags: --debug
+
+      - name: Cache Docker layers
+        id: cache-foundation
+        uses: actions/cache@v3.3.1
+        with:
+          path: |
+            ${{ runner.temp }}/.buildx-cache
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-al2-buildx-${{ github.job }}
+          restore-keys: |
+            ${{ runner.os }}-al2-buildx-${{ github.job }}
+            ${{ runner.os }}-al2-buildx-
+
+      - name: Download cmake
+        if: steps.cache-3rd-party.outputs.cache-hit != 'true'
+        run: |
+          if [ ! -f 3rd-party/cmake.tgz ] ; then
+            make 3rd-party/cmake.tgz
+          fi
+
+      - name: Upload cmake.tgz
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: cached-cmake.tgz
+          path: 3rd-party/cmake.tgz
+
+       ## Gleaned from https://evilmartians.com/chronicles/build-images-on-github-actions-with-docker-layer-caching
+      - name: Build foundation image
+        if: 'true'
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: foundation
+          push: true
+          # see https://github.com/docker/build-push-action/issues/820
+          platforms: linux/amd64
+          tags: localhost:5000/foundation:latest
+          #tags: ${{ steps.prep.outputs.tagged_image }}
+          cache-from: type=local,src=${{ runner.temp }}/.buildx-cache
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=local,mode=max,dest=${{ runner.temp }}/.buildx-cache-new
+
+      - name: Build and export
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: foundation
+          # see https://github.com/docker/build-push-action/issues/820
+          platforms: linux/amd64
+          tags: foundation:latest
+          outputs: type=docker,dest=${{ runner.temp }}/foundation.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: foundation
+          path: ${{ runner.temp }}/foundation.tar
+
+      ## Gleaned from https://www.hyperdx.io/blog/docker-buildx-cache-with-github-actions
+      - name: Build foundation image
+        if: 'false'
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: foundation
+          push: true
+          # see https://github.com/docker/build-push-action/issues/820
+          platforms: linux/amd64
+          tags: localhost:5000/foundation:latest
+          #tags: ${{ steps.prep.outputs.tagged_image }}
+          cache-from: type=gha
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=gha,mode=max
+
+      - name: Move cache after foundation build
+        if: 'true'
+        run: |
+          rm -rf ${{ runner.temp }}/.buildx-cache
+          mv -v ${{ runner.temp }}/.buildx-cache-new ${{ runner.temp }}/.buildx-cache
+
+#  lambda-base:
+
+      - name: Build lambda-base image
+        if: 'true'
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: lambda-base
+          push: true
+          # see https://github.com/docker/build-push-action/issues/820
+          platforms: linux/amd64
+          tags: localhost:5000/lambda-base:latest
+          # tags: ${{ steps.prep.outputs.tagged_image }}
+          cache-from: type=local,src=${{ runner.temp }}/.buildx-cache
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=local,mode=max,dest=${{ runner.temp }}/.buildx-cache-new
+
+      - name: Build and export
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: lambda-base
+          # see https://github.com/docker/build-push-action/issues/820
+          platforms: linux/amd64
+          tags: lambda-base:latest
+          outputs: type=docker,dest=${{ runner.temp }}/lambda-base.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: lambda-base
+          path: ${{ runner.temp }}/lambda-base.tar
+
+      - name: Build lambda-base image
+        if: 'false'
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: lambda-base
+          push: true
+          # see https://github.com/docker/build-push-action/issues/820
+          platforms: linux/amd64
+          tags: localhost:5000/lambda-base:latest
+          # tags: ${{ steps.prep.outputs.tagged_image }}
+          cache-from: type=gha
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=gha,mode=max
+
+      - name: Move cache
+        if: 'true'
+        run: |
+          rm -rf ${{ runner.temp }}/.buildx-cache
+          mv -v ${{ runner.temp }}/.buildx-cache-new ${{ runner.temp }}/.buildx-cache
+
+#  builder:
+
+      - name: Download wgrib2
+        #if: steps.cache-builder.outputs.cache-hit != 'true'
+        run: |
+          if [ ! -f 3rd-party/wgrib2.tgz ] ; then
+            make 3rd-party/wgrib2.tgz
+          fi
+
+      - name: Build builder image
+        if: 'true'
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: builder
+          push: true
+          # see https://github.com/docker/build-push-action/issues/820
+          platforms: linux/amd64
+          tags: localhost:5000/builder:latest
+          #tags: ${{ steps.prep.outputs.tagged_image }}
+          cache-from: type=local,src=${{ runner.temp }}/.buildx-cache
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=local,mode=max,dest=${{ runner.temp }}/.buildx-cache-new
+          ## Gleaned from https://docs.docker.com/build/ci/github-actions/named-contexts/
+          build-contexts: |
+            foundation=docker-image://localhost:5000/foundation:latest
+
+      - name: Build and export
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: builder
+          # see https://github.com/docker/build-push-action/issues/820
+          platforms: linux/amd64
+          tags: builder:latest
+          outputs: type=docker,dest=${{ runner.temp }}/builder.tar
+          build-contexts: |
+            foundation=docker-image://localhost:5000/foundation:latest
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3.1.2
+        with:
+          name: builder
+          path: ${{ runner.temp }}/builder.tar
+
+      - name: Build builder image
+        if: 'false'
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: Dockerfile
+          # Set the desired build target here
+          target: builder
+          push: true
+          # see https://github.com/docker/build-push-action/issues/820
+          platforms: linux/amd64
+          tags: localhost:5000/builder:latest
+          #tags: ${{ steps.prep.outputs.tagged_image }}
+          cache-from: type=gha
+          # Note the mode=max here
+          # More: https://github.com/moby/buildkit#--export-cache-options
+          # And: https://github.com/docker/buildx#--cache-tonametypetypekeyvalue
+          cache-to: type=gha,mode=max
+
+      - name: Move cache
+        if: 'false'
+        run: |
+          rm -rf ${{ runner.temp }}/.buildx-cache
+          mv -v ${{ runner.temp }}/.buildx-cache-new ${{ runner.temp }}/.buildx-cache
