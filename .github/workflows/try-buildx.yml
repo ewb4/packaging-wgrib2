@@ -116,7 +116,7 @@ jobs:
           path: ${{ runner.temp }}/foundation.tar
 
       ## Gleaned from https://www.hyperdx.io/blog/docker-buildx-cache-with-github-actions
-      - name: Build foundation image
+      - name: Build foundation image - gha
         if: 'false'
         uses: docker/build-push-action@v4.1.1
         with:
@@ -183,7 +183,7 @@ jobs:
           name: lambda-base
           path: ${{ runner.temp }}/lambda-base.tar
 
-      - name: Build lambda-base image
+      - name: Build lambda-base image - gha
         if: 'false'
         uses: docker/build-push-action@v4.1.1
         with:
@@ -262,7 +262,7 @@ jobs:
           name: builder
           path: ${{ runner.temp }}/builder.tar
 
-      - name: Build builder image
+      - name: Build builder image - gha
         if: 'false'
         uses: docker/build-push-action@v4.1.1
         with:
