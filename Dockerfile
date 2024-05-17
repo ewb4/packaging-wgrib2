@@ -22,7 +22,7 @@ RUN sed -i "s|MAKE_SHARED_LIB=0|MAKE_SHARED_LIB=1|g" makefile && \
       make lib
 
 RUN cp /tmp/grib2/lib/libwgrib2.so /usr/lib/python3/libwgrib2.so && \
-      python3 -m pip install numpy boto3 netCDF4
+      apt-get install -y python3-numpy python3-boto3 python3-netcdf4
 
 RUN wget -q -O - https://ftp.cpc.ncep.noaa.gov/wd51we/pywgrib2_s/pywgrib2_s.tgz.v0.0.11 | \
       tar -x -C /usr/lib/python3 -z -f - --strip-components=1 pywgrib2_s/pywgrib2_s.py
